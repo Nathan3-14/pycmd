@@ -1,1 +1,1 @@
-from classes import Command, CommandReader
+from .classes import Command, CommandReader

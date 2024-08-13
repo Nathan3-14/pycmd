@@ -8,6 +8,13 @@ print = console.print
 print_json = lambda _json: console.print_json(json.dumps(_json))
 
 
+def c_bool(self, x: str) -> bool:
+    if x.lower() in ["true", "1", "t",]:
+        return True
+    else:
+        return False
+
+
 class Command:
     def __init__(self, function: Callable) -> None:
         self.function = function
