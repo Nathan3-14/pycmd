@@ -30,7 +30,6 @@ class CommandReader:
     
     def convert_type(self, command_name: str, command_args: List[str]) -> List[Any]:
         args_type_fixed = []
-        #TODO Add regex for <.+:.+> and [.+:.+] TODO#
         needed_arg_list = self.help_details[command_name]["usage"].split(" ")[1:]
         print(needed_arg_list)
 
