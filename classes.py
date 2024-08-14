@@ -82,7 +82,7 @@ class CommandReader:
 
     def execute(self, command_name: str, args: List[str]) -> None:
         fixed_args = self.convert_type(command_name, args)
-        output = self.commands[command_name].function(*fixed_args)
+        output = self.commands[command_name](*fixed_args)
         if output != None:
             print(output)
 
