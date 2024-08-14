@@ -32,19 +32,24 @@ class CommandReader:
         args_type_fixed = []
         #TODO Add regex for <.+:.+> and [.+:.+] TODO#
         needed_arg_list = self.help_details[command_name]["usage"].split(" ")[1:]
+        print(needed_arg_list)
 
         for index, arg in enumerate(needed_arg_list):
-            _arg = None
-            arg_needed = re.match(r"(?<=\<)[a-zA-Z]+:[a-zA-Z]+(?=\>)", arg)
-            arg_optional = re.match(r"\[[a-zA-Z]+:[a-zA-Z]+\]", arg)
+            arg_needed = re.match(r"(\<)[a-zA-Z_-]+:[a-zA-Z_-]+(\>)", arg)
+            arg_optional = re.match(r"(\[)[a-zA-Z_-]+:[a-zA-Z_-]+(\])", arg)
+            print(arg_needed)
+            print(arg_optional)
 
             arg_needed = arg_needed.group()[1:-1].split(":") if arg_needed != None else None
             arg_optional = arg_optional.group()[1:-1].split(":") if arg_optional != None else None
+            print(arg_needed)
+            print(arg_optional)
 
             if arg_needed != None:
                 arg_name = arg_needed[0]
                 arg_value = command_args[index]
                 arg_type = arg_needed[1]
+                print(arg_type)
                 
                 type_command = str
                 match arg_type:
@@ -79,6 +84,7 @@ class CommandReader:
 
     def execute(self, command_name: str, args: List[str]) -> None:
         fixed_args = self.convert_type(command_name, args)
+        print(fixed_args)
         output = self.commands[command_name].function(*fixed_args)
         if output != None:
             print(output)
