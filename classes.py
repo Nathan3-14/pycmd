@@ -1,3 +1,4 @@
+import re
 from rich.console import Console
 from typing import Any, Callable, List, Literal
 from yaml import load as y_load, BaseLoader
@@ -28,20 +29,47 @@ class CommandReader:
         self.interpret_detail_file(detail_path)
     
     def convert_type(self, command_name: str, command_args: List[str]) -> List[Any]:
-        returns = []
+        args_type_fixed = []
         #TODO Add regex for <.+:.+> and [.+:.+] TODO#
         needed_arg_list = self.help_details[command_name]["usage"].split(" ")[1:]
+
         for index, arg in enumerate(needed_arg_list):
-            arg_type = arg.split(":")[1][:-1]
-            
-            type_command = str
-            match arg_type:
-                case "int":
-                    type_command = int
-                case "bool":
-                    type_command = bool
-            returns.append(type_command(command_args[index]))
-        return returns
+            _arg = None
+            arg_needed = re.match(r"(?<=\<)[a-zA-Z]+:[a-zA-Z]+(?=\>)", arg)
+            arg_optional = re.match(r"\[[a-zA-Z]+:[a-zA-Z]+\]", arg)
+
+            arg_needed = arg_needed.group()[1:-1].split(":") if arg_needed != None else None
+            arg_optional = arg_optional.group()[1:-1].split(":") if arg_optional != None else None
+
+            if arg_needed != None:
+                arg_name = arg_needed[0]
+                arg_value = command_args[index]
+                arg_type = arg_needed[1]
+                
+                type_command = str
+                match arg_type:
+                    case "int":
+                        type_command = int
+                    case "bool":
+                        type_command = c_bool
+                args_type_fixed.append(type_command(arg_value))
+            elif arg_optional != None:
+                arg_name = arg_optional[0]
+                try:
+                    arg_value = command_args[index]
+                except IndexError:
+                    continue
+                arg_type = arg_optional[1]
+                
+                type_command = str
+                match arg_type:
+                    case "int":
+                        type_command = int
+                    case "bool":
+                        type_command = c_bool
+                args_type_fixed.append(type_command(arg_value))
+
+        return args_type_fixed
 
 
     # def help(self): #TODO
