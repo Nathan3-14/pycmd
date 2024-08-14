@@ -8,7 +8,7 @@ print = console.print
 print_json = lambda _json: console.print_json(json.dumps(_json))
 
 
-def c_bool(self, x: str) -> bool:
+def c_bool(x: str) -> bool:
     if x.lower() in ["true", "1", "t",]:
         return True
     else:
@@ -29,7 +29,9 @@ class CommandReader:
     
     def convert_type(self, command_name: str, command_args: List[str]) -> List[Any]:
         returns = []
-        for index, arg in enumerate(self.help_details[command_name]["usage"].split(" ")[1:]):
+        #TODO Add regex for <.+:.+> and [.+:.+] TODO#
+        needed_arg_list = self.help_details[command_name]["usage"].split(" ")[1:]
+        for index, arg in enumerate(needed_arg_list):
             arg_type = arg.split(":")[1][:-1]
             
             type_command = str
