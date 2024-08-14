@@ -15,18 +15,13 @@ def c_bool(x: str) -> bool:
     else:
         return False
 
-
-class Command:
-    def __init__(self, function: Callable) -> None:
-        self.function = function
-        self.name = function.__name__
     
 class CommandReader:
-    def __init__(self, commands: List[Command], detail_path: str) -> None:
+    def __init__(self, commands: List[Callable], detail_path: str) -> None:
         self.commands = {
-            command_object.name: command_object for command_object in commands
+            command_function.__name__: command_function for command_function in commands
         }
-        self.commands["help"] = Command(self.help)
+        self.commands["help"] = self.help
         self.interpret_detail_file(detail_path)
         self.help_details["help"] = {
             "usage": "help \[command:str]", # type: ignore
