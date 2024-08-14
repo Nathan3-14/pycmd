@@ -1,6 +1,6 @@
 import re
 from rich.console import Console
-from typing import Any, Callable, List, Literal
+from typing import Any, Callable, Dict, List, Literal
 from yaml import load as y_load, BaseLoader
 import json
 
@@ -26,29 +26,27 @@ class CommandReader:
         self.commands = {
             command_object.name: command_object for command_object in commands
         }
+        self.commands["help"] = Command(self.help)
         self.interpret_detail_file(detail_path)
+        self.help_details["help"] = {
+            "usage": "help \[command:str]", # type: ignore
+            "description": "Provides help for all or a specific command(s)"
+        }
     
     def convert_type(self, command_name: str, command_args: List[str]) -> List[Any]:
         args_type_fixed = []
         needed_arg_list = self.help_details[command_name]["usage"].split(" ")[1:]
-        print(needed_arg_list)
 
         for index, arg in enumerate(needed_arg_list):
             arg_needed = re.match(r"(\<)[a-zA-Z_-]+:[a-zA-Z_-]+(\>)", arg)
             arg_optional = re.match(r"(\[)[a-zA-Z_-]+:[a-zA-Z_-]+(\])", arg)
-            print(arg_needed)
-            print(arg_optional)
 
             arg_needed = arg_needed.group()[1:-1].split(":") if arg_needed != None else None
             arg_optional = arg_optional.group()[1:-1].split(":") if arg_optional != None else None
-            print(arg_needed)
-            print(arg_optional)
 
             if arg_needed != None:
-                arg_name = arg_needed[0]
                 arg_value = command_args[index]
                 arg_type = arg_needed[1]
-                print(arg_type)
                 
                 type_command = str
                 match arg_type:
@@ -58,7 +56,6 @@ class CommandReader:
                         type_command = c_bool
                 args_type_fixed.append(type_command(arg_value))
             elif arg_optional != None:
-                arg_name = arg_optional[0]
                 try:
                     arg_value = command_args[index]
                 except IndexError:
@@ -75,15 +72,21 @@ class CommandReader:
 
         return args_type_fixed
 
+    def help_command(self, command_name: str) -> str:
+        command_data = self.help_details[command_name]
+        command_usage = command_data["usage"]
+        command_description = command_data["description"]
+        return f"[white bold]{command_name}:[/white bold]\n[magenta]\t{command_description}[/magenta]\n[magenta]\tUsage: [/magenta]{command_usage}"
 
-    # def help(self): #TODO
-    #     for command_name, command_data in self.details["commands"].items():
-    #         command_description = command_data["description"]
-    #         command_usage = command_data["usage"]
+    def help(self, command_name: str=""):
+        if command_name != "":
+            print(self.help_command(command_name))
+        else:
+            for command_name, _ in self.help_details.items():
+                print(self.help_command(command_name))
 
     def execute(self, command_name: str, args: List[str]) -> None:
         fixed_args = self.convert_type(command_name, args)
-        print(fixed_args)
         output = self.commands[command_name].function(*fixed_args)
         if output != None:
             print(output)
